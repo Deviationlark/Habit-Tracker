@@ -31,7 +31,7 @@ namespace HabitTracker
                     GetUserInput();
                     break;
                 case "3":
-                    Habits.DeleteHabit();
+                    Habits.DeleteHabit(habits);
                     break;
                 default:
                     Console.WriteLine("Not an option. Press enter to try again.");

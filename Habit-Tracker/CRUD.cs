@@ -7,8 +7,9 @@ namespace HabitTracker
     {
         public static List<DrinkingWater> tableData = new();
         public static string connectionString = @"Data Source=Habit-Tracker.db";
-        public static void GetAllRecords()
+        public static bool GetAllRecords()
         {
+            bool hasRows = false;
             var menu = new Menu();
             string habit = Habits.GetInputHabit(Menu.habits);
             string info = Helpers.GetColumn(habit);
@@ -36,6 +37,7 @@ namespace HabitTracker
                             }
                         );
                     }
+                    hasRows = true;
                 }
                 else
                     Console.WriteLine("No rows found");
@@ -55,6 +57,7 @@ namespace HabitTracker
                 }
                 Console.ReadLine();
             }
+            return hasRows;
         }
         public static void Insert(string habit)
         {
@@ -103,7 +106,7 @@ namespace HabitTracker
                 }
             }
             else
-                Console.WriteLine("No rows found.");
+                Console.WriteLine("No records found.");
 
         }
 
@@ -111,37 +114,42 @@ namespace HabitTracker
         {
             GetAllRecords();
             string info = Helpers.GetColumn(habit);
-            var recordID = Helpers.GetNumberInput("Type the ID you want to update, Type 0 to go to Main Menu");
-
-            using (var connection = new SqliteConnection(connectionString))
+            if (tableData.Capacity > 0)
             {
-                connection.Open();
-
-                var checkCmd = connection.CreateCommand();
-                checkCmd.CommandText = $"SELECT EXISTS(SELECT 1 FROM {habit} WHERE Id = {recordID})";
-                int checkQuery = Convert.ToInt32(checkCmd.ExecuteScalar());
-
-                if (checkQuery == 0)
+                var recordID = Helpers.GetNumberInput("Type the ID you want to update, Type 0 to go to Main Menu");
+                using (var connection = new SqliteConnection(connectionString))
                 {
-                    Console.WriteLine($"Record with Id {recordID} doesn't exist.");
-                    Console.ReadLine();
-                    connection.Close();
-                    Update(habit);
-                }
+                    connection.Open();
 
-                string date = Helpers.GetDateInput();
+                    var checkCmd = connection.CreateCommand();
+                    checkCmd.CommandText = $"SELECT EXISTS(SELECT 1 FROM {habit} WHERE Id = {recordID})";
+                    int checkQuery = Convert.ToInt32(checkCmd.ExecuteScalar());
 
-                int quantity = Helpers.GetNumberInput($"Insert the amount of {info} or other measure of your choice");
+                    if (checkQuery == 0)
+                    {
+                        Console.WriteLine($"Record with Id {recordID} doesn't exist.");
+                        Console.ReadLine();
+                        connection.Close();
+                        Update(habit);
+                    }
+
+                    string date = Helpers.GetDateInput();
+
+                    int quantity = Helpers.GetNumberInput($"Insert the amount of {info} or other measure of your choice");
 
 
-                var tableCmd = connection.CreateCommand();
-                tableCmd.CommandText = @$"UPDATE {habit} SET date = '{date}', {info} = {quantity} WHERE Id = 
+                    var tableCmd = connection.CreateCommand();
+                    tableCmd.CommandText = @$"UPDATE {habit} SET date = '{date}', {info} = {quantity} WHERE Id = 
         {recordID}";
 
-                tableCmd.ExecuteNonQuery();
+                    tableCmd.ExecuteNonQuery();
 
-                connection.Close();
+                    connection.Close();
+                }
             }
+            else
+                Console.WriteLine("No records found");
+
         }
     }
 }

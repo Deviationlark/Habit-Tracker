@@ -17,6 +17,7 @@ namespace HabitTracker
             {
                 Console.WriteLine("Invalid Date. (Format: dd-mm-yy).");
                 dateInput = Console.ReadLine();
+                if (dateInput == "0") Menu.GetUserInput();
             }
 
             return dateInput;
